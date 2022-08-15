@@ -1,4 +1,4 @@
-;/*! showdown v 2.1.0 - 21-04-2022 */
+;/*! showdown v 2.1.0 - 15-08-2022 */
 (function(){
 /**
  * Created by Tivie on 13-07-2015.
@@ -46,6 +46,11 @@ function getDefaultOpts (simple) {
     parseImgDimensions: {
       defaultValue: false,
       describe: 'Turn on/off image dimension parsing',
+      type: 'boolean'
+    },
+    extractImageCaptions: {
+      defaultValue: false,
+      describe: 'Extract image alt tag as a caption for the image',
       type: 'boolean'
     },
     simplifiedAutoLink: {
@@ -3850,7 +3855,13 @@ showdown.subParser('images', function (text, options, globals) {
       .replace(showdown.helper.regexes.asteriskDashAndColon, showdown.helper.escapeCharactersCallback);
     //url = showdown.helper.escapeCharacters(url, '*_', false);
     url = url.replace(showdown.helper.regexes.asteriskDashAndColon, showdown.helper.escapeCharactersCallback);
-    var result = '<img src="' + url + '" alt="' + altText + '"';
+    var result = '';
+
+    if (options.extractImageCaptions && altText) {
+      result += '<figure>';
+    }
+
+    result += '<img src="' + url + '" alt="' + altText + '"';
 
     if (title && showdown.helper.isString(title)) {
       title = title
@@ -3869,6 +3880,11 @@ showdown.subParser('images', function (text, options, globals) {
     }
 
     result += ' />';
+
+    if (options.extractImageCaptions && altText) {
+      result += '<figcaption>' + altText + '</figcaption>';
+      result += '</figure>';
+    }
 
     return result;
   }
